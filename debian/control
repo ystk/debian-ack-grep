@@ -1,0 +1,23 @@
+Source: ack-grep
+Section: utils
+Priority: optional
+Build-Depends: debhelper (>= 7.0.50), quilt (>= 0.46-7), perl (>= 5.8.8-7), libfile-next-perl, quilt, libtest-differences-perl, libtest-pod-perl, bash-completion
+Maintainer: Ryan Niebur <ryan@debian.org>
+Vcs-Git: git://git.ryan52.info/git/ack-grep
+Vcs-Browser: http://git.ryan52.info/?p=ack-grep;a=summary
+Homepage: http://search.cpan.org/dist/ack/
+Standards-Version: 3.8.3
+
+Package: ack-grep
+Architecture: all
+Depends: libfile-next-perl, ${perl:Depends}, ${misc:Depends}
+Suggests: bash-completion
+Description: grep-like program specifically for large source trees
+ Ack is designed as a replacement for 99% of the uses of grep. ack is
+ intelligent about the files it searches. It knows about certain file
+ types, based on both the extension on the file and, in some cases, the
+ contents of the file.
+ .
+ Ack ignores backup files and files under CVS and .svn directories. It
+ also highlights matches to help you see where the match was. Ack uses
+ perl regular expressions.

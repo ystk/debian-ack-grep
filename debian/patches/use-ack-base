@@ -1,0 +1,22 @@
+install ack-base instead of ack (which includes all dependencies embedded)
+
+--- a/Makefile.PL
++++ b/Makefile.PL
+@@ -19,7 +19,7 @@
+         'Basic.pm'      => '$(INST_LIBDIR)/App/Ack/Plugin/Basic.pm',
+         #'Tar.pm'        => '$(INST_LIBDIR)/App/Ack/Plugin/Tar.pm',
+     },
+-    EXE_FILES           => [ 'ack' ],
++    EXE_FILES           => [ 'ack-base' ],
+     PREREQ_PM => {
+         'Test::Harness'     => 2.50, # Something reasonably newish
+         'Term::ANSIColor'   => 0,
+@@ -57,7 +57,7 @@
+ sub MY::top_targets {
+     my $str = shift->SUPER::top_targets(@_);
+ 
+-    $str =~ s/^pure_all.+/$& ack ack-help.txt ack-help-types.txt/m;
++    $str =~ s/^pure_all.+/$& ack-help.txt ack-help-types.txt/m;
+ 
+     return $str;
+ }

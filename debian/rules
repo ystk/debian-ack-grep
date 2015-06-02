@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+
+%:
+	dh --with quilt $@
+
+override_dh_auto_test:
+	# ack behaves differently, causing the tests to fail
+	[ ! -t 0 ] || dh_auto_test
+
+override_dh_auto_clean:
+	[ ! -f Makefile ] || touch Makefile
+	dh_auto_clean
+
+override_dh_clean:
+	dh_clean --exclude=t/swamp/
+	# make things partly sane for me :)
+	[ ! -d .git -o ! -x /usr/bin/git ] || git checkout ack ack-help.txt
+
+override_dh_fixperms:
+	mv debian/ack-grep/usr/bin/ack-base debian/ack-grep/usr/bin/ack-grep
+	mv debian/ack-grep/usr/share/man/man1/ack-base.1p.gz debian/ack-grep/usr/share/man/man1/ack-grep.1p.gz
+	mv etc/ack.bash_completion.sh debian/ack-grep.bash-completion
+	dh_bash-completion
+	mv debian/ack-grep.bash-completion etc/ack.bash_completion.sh
+	dh_fixperms
