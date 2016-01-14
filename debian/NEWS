@@ -1,0 +1,21 @@
+ack-grep (2.12-2) unstable; urgency=low
+
+  The program "ack" is no more renamed to "ack-grep" since the conflicting
+  "ack", a Kanji code converter, has been removed from Debian (see #662114).
+
+  For a transitional phase of one Debian release, the package will though
+  contain symlinks from ack-grep to ack for backwards compatibility.
+
+ -- Axel Beckert <abe@debian.org>  Mon, 17 Feb 2014 18:03:56 +0100
+
+ack-grep (2.04-1) unstable; urgency=low
+
+  From upstream Changes:  
+
+  ack 2 makes some big changes in its behaviors that could trip up
+  users who are used to the idiosyncracies of ack 1.x.  These changes
+  could affect your searching happiness, so please read them.
+
+  Read the full list in /usr/share/doc/ack-grep/changelog.gz.
+
+ -- gregor herrmann <gregoa@debian.org>  Sat, 11 May 2013 18:38:48 +0200

@@ -1,0 +1,21 @@
+Origin: commit 17504aa361eef269c57f43c21e16d1705cd1e7c0
+Author: Rob Hoelz <rob@hoelz.ro>
+Bug-Debian: https://bugs.debian.org/760870
+Bug: https://github.com/petdance/ack2/issues/491
+Bug: https://github.com/petdance/ack2/issues/498
+Description: Make sure strings match along lines
+ This is redundant for most usages of ack, but fixes a bug when using -l.
+
+diff --git a/ack b/ack
+index e66f73a..852ec1c 100644
+--- a/ack
++++ b/ack
+@@ -331,7 +331,7 @@ sub build_regex {
+         $str = "(?i)$str";
+     }
+ 
+-    my $re = eval { qr/$str/ };
++    my $re = eval { qr/$str/m };
+     if ( !$re ) {
+         die "Invalid regex '$str':\n  $@";
+     }

@@ -1,0 +1,15 @@
+%YAML 1.1
+---
+# https://wiki.debian.org/UpstreamMetadata
+Archive: CPAN
+Bug-Database: https://github.com/petdance/ack2/issues
+Bug-Sumbit: https://github.com/petdance/ack2/issues/new
+Changelog: http://beyondgrep.com/changes.txt
+Contact: https://groups.google.com/d/forum/ack-users
+Security-Contact: andy@petdance.com
+# FAQ URL changes with each version, so this is where the link to the FAQ is
+FAQ: http://beyondgrep.com/documentation/
+Name: ack
+Homepage: http://beyondgrep.com/
+Repository: git://github.com/petdance/ack2.git
+Repository-Browse: https://github.com/petdance/ack2

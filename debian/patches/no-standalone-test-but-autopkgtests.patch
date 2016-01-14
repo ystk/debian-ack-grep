@@ -1,0 +1,137 @@
+Description: Misuse $ACK_TEST_STANDALONE to switch between build-/installed-time tests
+ ack's test suite originally runs twice, once for the normal version
+ (called "classic") and once for the standalone version. Since Debian
+ doesn't ship the standalone version, we don't need to test it
+ either. But instead we want installed-time tests via the autopkgtest
+ infrastructure.
+ .
+ So we change (nearly) all occurrences of the ACK_TEST_STANDALONE
+ environment variable of ack's test suite to ADTTMP and switch between
+ build-time and installed-time testing with it. Which fits perfectly
+ because -Mblib is usually not used or unset if
+ $ENV{ACK_TEST_STANDALONE} is set.
+ .
+ So we skip the test_standalone target, but pass $ADTTMP instead of a
+ hardcoded 0 to t/runtests.pl to trigger the switch. That way it
+ should even work when running "make test" after "perl Makefile.PL"
+ has run.
+Author: Axel Beckert <abe@debian.org>
+Forwarded: not-needed
+
+Index: ack-grep/Makefile.PL
+===================================================================
+--- ack-grep.orig/Makefile.PL	2014-09-17 20:12:06.000000000 +0200
++++ ack-grep/Makefile.PL	2014-09-17 20:12:06.000000000 +0200
+@@ -121,12 +121,12 @@
+ 	$(CP) $(ACK) ~/bin/ack2
+ 	$(CP) ackrc ~/.ack2rc
+ 
+-test: test_classic test_standalone
++test: test_classic
+ 
+ fulltest: test_classic test_standalone test_xt
+ 
+ test_classic: all
+-	$(FULLPERLRUN) t/runtests.pl 0 $(TEST_VERBOSE) "$(INST_LIB)" "$(INST_ARCHLIB)" $(TEST_FILES)
++	$(FULLPERLRUN) t/runtests.pl "$(ADTTMP)" $(TEST_VERBOSE) "$(INST_LIB)" "$(INST_ARCHLIB)" $(TEST_FILES)
+ 
+ test_standalone: all ack-standalone
+ 	$(FULLPERLRUN) t/runtests.pl 1 $(TEST_VERBOSE) "$(INST_LIB)" "$(INST_ARCHLIB)" $(TEST_FILES)
+Index: ack-grep/t/runtests.pl
+===================================================================
+--- ack-grep.orig/t/runtests.pl	2014-09-17 20:12:06.000000000 +0200
++++ ack-grep/t/runtests.pl	2014-09-17 20:12:06.000000000 +0200
+@@ -16,5 +16,5 @@
+ open STDIN, '<', '/dev/null';
+ 
+ printf("Running tests on %s\n",
+-       $ENV{ACK_TEST_STANDALONE} ? 'ack-standalone' : 'blib/script/ack');
++       $ENV{ACK_TEST_STANDALONE} ? '/usr/bin/ack' : 'blib/script/ack');
+ test_harness(shift, shift, shift);
+Index: ack-grep/t/Util.pm
+===================================================================
+--- ack-grep.orig/t/Util.pm	2014-09-17 20:12:06.000000000 +0200
++++ ack-grep/t/Util.pm	2014-09-17 20:12:06.000000000 +0200
+@@ -125,8 +125,8 @@
+         unshift( @args, '--noenv' );
+     }
+ 
+-    if ( $ENV{'ACK_TEST_STANDALONE'} ) {
+-        unshift( @args, File::Spec->rel2abs( 'ack-standalone', $orig_wd ) );
++    if ( $ENV{'ADTTMP'} ) {
++        unshift( @args, File::Spec->rel2abs( '/usr/bin/ack', $orig_wd ) );
+     }
+     else {
+         unshift( @args, File::Spec->rel2abs( 'blib/script/ack', $orig_wd ) );
+@@ -352,7 +352,7 @@
+     my $perl = caret_X();
+ 
+     @args = build_ack_invocation( @args );
+-    if ( $ENV{'ACK_TEST_STANDALONE'} ) {
++    if ( $ENV{'ADTTMP'} ) {
+         unshift( @args, $perl );
+     }
+     else {
+@@ -609,7 +609,7 @@
+ 
+                 my $perl = caret_X();
+ 
+-                if ( $ENV{'ACK_TEST_STANDALONE'} ) {
++                if ( $ENV{'ADTTMP'} ) {
+                     unshift( @cmd, $perl );
+                 }
+                 else {
+Index: ack-grep/t/command-line-files.t
+===================================================================
+--- ack-grep.orig/t/command-line-files.t	2014-09-17 20:12:06.000000000 +0200
++++ ack-grep/t/command-line-files.t	2014-09-17 20:12:06.000000000 +0200
+@@ -54,7 +54,7 @@
+     # I don't care for this, but it's the least of the evils I could think of
+     if ( $ENV{'ACK_TEST_STANDALONE'} ) {
+         @expected_stderr = split( /\n/, <<'EOF' );
+-ack-standalone: non-existent-file.txt: No such file or directory
++ack: non-existent-file.txt: No such file or directory
+ EOF
+     }
+     else {
+Index: ack-grep/t/ack-x.t
+===================================================================
+--- ack-grep.orig/t/ack-x.t	2014-09-17 20:12:06.000000000 +0200
++++ ack-grep/t/ack-x.t	2014-09-17 20:12:06.000000000 +0200
+@@ -98,7 +98,7 @@
+ my @lhs_args = ( $perl, '-Mblib', build_ack_invocation( '-g', 'of', 't/text' ) );
+ my @rhs_args = ( $perl, '-Mblib', build_ack_invocation( '-x', 'the' ) ); # for now
+ 
+-if ( $ENV{'ACK_TEST_STANDALONE'} ) {
++if ( $ENV{'ADTTMP'} ) {
+     @lhs_args = grep { $_ ne '-Mblib' } @lhs_args;
+     @rhs_args = grep { $_ ne '-Mblib' } @rhs_args;
+ }
+Index: ack-grep/t/process-substitution.t
+===================================================================
+--- ack-grep.orig/t/process-substitution.t	2014-09-17 20:12:06.000000000 +0200
++++ ack-grep/t/process-substitution.t	2014-09-17 20:12:06.000000000 +0200
+@@ -51,7 +51,7 @@
+     # XXX doing this by hand here eq '=('
+     my $perl = caret_X();
+ 
+-    if ( $ENV{'ACK_TEST_STANDALONE'} ) {
++    if ( $ENV{'ADTTMP'} ) {
+         unshift( @args, $perl );
+     }
+     else {
+Index: ack-grep/t/lib/00-coverage.t
+===================================================================
+--- ack-grep.orig/t/lib/00-coverage.t	2014-09-17 20:12:06.000000000 +0200
++++ ack-grep/t/lib/00-coverage.t	2014-09-17 20:12:12.000000000 +0200
+@@ -11,6 +11,10 @@
+ 
+ use Test::More;
+ 
++unless ( $ENV{RELEASE_TESTING} ) {
++    plan( skip_all => "these tests are for release candidate testing" );
++}
++
+ my @pms = glob( '*.pm' );
+ 
+ @pms = grep { !/Debug.pm/ } @pms;

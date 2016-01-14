@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+PACKAGE = $(shell dh_listpackages)
+TMP     = $(CURDIR)/debian/$(PACKAGE)
+
+%:
+	dh $@
+
+override_dh_auto_test:
+	# ack behaves differently if not connected to a terminal,
+	# causing the tests to fail
+	[ ! -t 0 ] || dh_auto_test
+
+override_dh_clean:
+	dh_clean --exclude=t/swamp/

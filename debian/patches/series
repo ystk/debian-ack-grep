@@ -1,0 +1,2 @@
+no-standalone-test-but-autopkgtests.patch
+cherry-pick-17504aa-make-sure-strings-match-along-lines.patch
